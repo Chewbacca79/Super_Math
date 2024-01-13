@@ -5,7 +5,10 @@ import sys
 from settings import Settings
 
 
+
 class Facillimum_Library():
+    RESET_GAME = pygame.USEREVENT + 1
+
     """A library of python functions that make it easier to make stuff with pygame."""
 
     def __init__(self, screen) -> None:
@@ -30,8 +33,7 @@ class Facillimum_Library():
 
         self.rendered_words = {}
         self.text_box = True
-        self.game_won = False
-        self.ready = False
+        self.reset = False
 
 
     def draw_image(
@@ -170,10 +172,7 @@ class Facillimum_Library():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE or event.key == pygame.K_q:
                         sys.exit()
-                    if event.key == pygame.K_SPACE:
-                        self.ready = True
-                    else:
-                        self.ready = False
+                   
                     
                     if not a.__len__() > 999999999:
                         if event.key == pygame.K_KP_ENTER or event.key == pygame.K_RETURN:
@@ -215,7 +214,9 @@ class Facillimum_Library():
             self.draw_words(str(a), size, coordinates, False, color)
             self.update(1)
             c+=1
-            
+            if self.reset == True:
+                pygame.event.post(pygame.event.Event(pygame.USEREVENT, user_event=self.RESET_GAME))
+                break
     
 
     def draw_rect(self,

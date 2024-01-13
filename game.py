@@ -5,12 +5,11 @@ from settings import Settings
 from marioAnimation import Mario
 from coins import Coins
 from button import Button
-
 class Main:
     def __init__(self) -> None:
         pygame.init()
         pygame.mixer.init()
-        self.screen = pygame.display.set_mode((800, 800))
+        self.screen = pygame.display.set_mode((800, 800), pygame.FULLSCREEN | pygame.SCALED)
         pygame.display.set_caption("Math Game")
         self.FL = Facillimum_Library(self.screen)
         self.settings = Settings()
@@ -18,14 +17,13 @@ class Main:
         self.coins = Coins(self)
         self.button = Button(self)
         self.solved = True
-        self.playing = False
-        self.solvable = True
-        self.game_won = False
-        self.game_lost = False
         self.background = pygame.image.load('images/mario background image.png')
         self.background = pygame.transform.scale(self.background, (800, 700))
-        self.game_on = True
-        self.game_reset = False
+        self.text_box = True
+        self.reset = False
+        self.get_new_equation = True
+        self.game_lost = False
+        self.game_won  = False
         
     def play_solved(self):
         pygame.mixer.music.load('sound/11. Coin.mp3')
@@ -44,24 +42,23 @@ class Main:
         pygame.mixer.music.play()
    
     def update_screen(self):
-        if self.game_won == False:
-            self.screen.fill(self.settings.bg_color)
-            self.FL.draw_image(self.background, (0, 100))
+        self.screen.fill(self.settings.bg_color)
+        self.FL.draw_image(self.background, (0, 100))
        
     def get_equation(self):
-        self.first_number = random.randint(0, 10)
-        self.second_number = random.randint(0, 10)
-        self.answer = self.second_number + self.first_number
+        if self.get_new_equation == True:
+            self.first_number = random.randint(0, 10)
+            self.second_number = random.randint(0, 10)
+            self.answer = self.second_number + self.first_number
 
     def display_equation(self):
         self.FL.draw_words((str(self.first_number) + " + " + str(self.second_number) + " ="), 200, (20, 409), False, "black")
 
     def keydown_events(self, event):
-        if event.key == pygame.K_SPACE:
-            self.playing = True
-        elif event.key == pygame.K_ESCAPE:
+        if event.key == pygame.K_ESCAPE:
             sys.exit()
-        
+        if event.key == pygame.K_SPACE:
+            self.reset = True
 
     def check_events(self):
         for event in pygame.event.get():
@@ -69,64 +66,99 @@ class Main:
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 self.keydown_events(event)
-            
+           
+
+    
+
 
     def run_program(self):
-        while self.game_on:
+        while True:
+            # set beginning variables
+            self.get_equation()
+            
+           # check events
+            self.check_events()
+
+            # draws the screen
+            if self.game_lost == False and self.game_won == False:
                 self.update_screen()
+                self.mario.blitme()
+                self.display_equation()
+                self.coins.draw_coins()
+                self.coins.blitme()
+
+            # waits for the answer of the equation
+            if self.FL.open_text_box(70, (0, 730), (204, 68, 29)) == str(self.answer) and self.text_box == True:
+                # equation solved
+                self.play_solved()
+                self.settings.wins += 1
+                self.get_new_equation = True
+                self.coins.revealer_rect.x += 75
+                self.settings.chances = 5
+                print(self.settings.chances)
+            else:
+                # equation not solved
                 if self.game_won == False:
-                    self.FL.draw_words("Press space to start", 80, (125, 400), False, "black")
-               
-                if self.playing == True and self.solved == True and self.game_won == False and self.game_lost == False:
-                    
-                    self.update_screen()
-                    self.solved = False
-                    self.get_equation()
-                    self.display_equation()
-                    self.coins.draw_coins()
-                    self.mario.blitme()
-                    self.coins.blitme()
-                    if self.FL.open_text_box(60, (0, 740), (204, 68, 29)) == str(self.answer) and self.solvable == True:
-                        self.solved = True
-                        self.play_solved()
-                        self.settings.chances = 5
-                        self.coins.move_right = True
-                        self.coins.reveal_coins()
-                        self.settings.wins += 1
-                        if self.settings.wins == 11:
-                            self.FL.draw_words("VICTORY!!", 200, (40, 60), True, "green")
-                            self.play_win()
-                            self.game_won = True
-                            self.solvable = False 
-                    else:
-                        self.settings.chances = self.settings.chances - 1
-                        self.play_lose()
-                        while self.solved == False:
-                            if self.FL.open_text_box(60, (0, 740), (204, 68, 29)) == str(self.answer) and self.solvable == True:
-                                self.solved = True
-                                self.play_solved()
-                                self.settings.chances = 5
-                                self.coins.move_right = True
-                                self.coins.reveal_coins()
-                                self.settings.wins += 1
-                                if self.settings.wins == 11:
-                                    self.FL.draw_words("VICTORY!!", 200, (40, 60), True, "green")
-                                    self.play_win()
-                                    self.game_won = True
-                                    self.solvable = False
-                            else:
-                                self.settings.chances = self.settings.chances - 1
-                                self.play_lose()
-                                if self.settings.chances < 1:
-                                    self.FL.draw_words("GAME OVER", 180, (10, 60), True, "red")
-                                    self.play_game_over()
-                                    self.game_lost = True
-                                    self.solvable = False
-                                    
-                self.FL.update()
-                self.check_events()
+                    self.play_lose()
+                    self.settings.chances -= 1
+                    self.get_new_equation = False
+                    print(self.settings.chances)
                 
 
+            # game over
+            if self.settings.chances < 1:
+                self.game_lost = True
+                self.text_box = False
+                self.FL.draw_words("GAME OVER", 180, (10, 90), False, "red")
+                self.FL.draw_words("Press space to play again", 60, (0, 600), False, "black")
+                self.FL.text_box = False
+
+                # resets the game
+                if self.game_lost == True:
+                    self.coins.reset_x()
+                    self.check_events()
+                    if self.reset == True:
+                        self.get_new_equation = True
+                        self.settings.chances = 5
+                        self.text_box = True
+                        self.FL.text_box = True
+                        self.game_lost = False
+                        self.reset = False
+                        pygame.mixer.music.stop()
+
+            # game won
+            if self.coins.revealer_rect.x > 750:
+                self.game_won = True
+                self.text_box = False
+                self.FL.draw_words("VICTORY!!", 180, (60, 90), False, "green")
+                self.FL.draw_words("Press space to play again", 60, (0, 600), False, "black")
+                self.FL.text_box = False
+
+                #resets the game
+                if self.game_won == True:
+                    self.check_events()
+                    if self.reset == True:
+                        self.get_new_equation = True
+                        self.settings.chances = 5
+                        self.text_box = True
+                        self.FL.text_box = True
+                        self.game_won = False
+                        self.reset = False
+                        self.coins.reset_x()
+                        pygame.mixer.music.stop()
+
+
+
+
+
+
+
+               
+
+            # the same as pygame.display.flip()
+            self.FL.update()
+
+                
 if __name__ == "__main__":
     game = Main()
     game.run_program()
