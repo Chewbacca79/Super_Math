@@ -4,18 +4,16 @@ import random
 from settings import Settings
 from marioAnimation import Mario
 from coins import Coins
-from button import Button
 class Main:
     def __init__(self) -> None:
         pygame.init()
         pygame.mixer.init()
-        self.screen = pygame.display.set_mode((800, 800), pygame.FULLSCREEN | pygame.SCALED)
+        self.screen = pygame.display.set_mode((800, 800))
         pygame.display.set_caption("Math Game")
         self.FL = Facillimum_Library(self.screen)
         self.settings = Settings()
         self.mario = Mario(self)
         self.coins = Coins(self)
-        self.button = Button(self)
         self.solved = True
         self.background = pygame.image.load('images/mario background image.png')
         self.background = pygame.transform.scale(self.background, (800, 700))
@@ -33,14 +31,7 @@ class Main:
         pygame.mixer.music.load('sound/17. Lost A Life.mp3')
         pygame.mixer.music.play()
 
-    def play_game_over(self):
-        pygame.mixer.music.load('sound/18. Game Over.mp3')
-        pygame.mixer.music.play()
-
-    def play_win(self):
-        pygame.mixer.music.load('sound/SE Game SEction Clear Fanfare.mp3')
-        pygame.mixer.music.play()
-   
+    
     def update_screen(self):
         self.screen.fill(self.settings.bg_color)
         self.FL.draw_image(self.background, (0, 100))
@@ -67,10 +58,6 @@ class Main:
             elif event.type == pygame.KEYDOWN:
                 self.keydown_events(event)
            
-
-    
-
-
     def run_program(self):
         while True:
             # set beginning variables
@@ -95,14 +82,12 @@ class Main:
                 self.get_new_equation = True
                 self.coins.revealer_rect.x += 75
                 self.settings.chances = 5
-                print(self.settings.chances)
             else:
                 # equation not solved
-                if self.game_won == False:
+                if self.game_won == False and self.game_lost == False:
                     self.play_lose()
                     self.settings.chances -= 1
                     self.get_new_equation = False
-                    print(self.settings.chances)
                 
 
             # game over
@@ -112,6 +97,7 @@ class Main:
                 self.FL.draw_words("GAME OVER", 180, (10, 90), False, "red")
                 self.FL.draw_words("Press space to play again", 60, (0, 600), False, "black")
                 self.FL.text_box = False
+                
 
                 # resets the game
                 if self.game_lost == True:
@@ -147,17 +133,10 @@ class Main:
                         self.coins.reset_x()
                         pygame.mixer.music.stop()
 
-
-
-
-
-
-
-               
-
             # the same as pygame.display.flip()
             self.FL.update()
 
+            
                 
 if __name__ == "__main__":
     game = Main()

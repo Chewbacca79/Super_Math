@@ -20,15 +20,21 @@ class Mario:
     self.y = 554
     self.rect.x = self.x
     self.rect.y = self.y
-    self.time = 0
+    self.delay = False
+       
 
   def animate_jump(self):
     self.image = self.jumping_image
-    self.rect.y = 350
+    if self.rect.y > 350:
+      self.rect.y -= 1 
+    
+    
 
   def animate_lose(self):
     self.image = self.falling_image
 
   def blitme(self):
     self.screen.blit(self.image, self.rect)
+
+  
     

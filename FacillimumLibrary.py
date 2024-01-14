@@ -170,7 +170,7 @@ class Facillimum_Library():
         while self.text_box:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE or event.key == pygame.K_q:
+                    if event.key == pygame.K_ESCAPE:
                         sys.exit()
                    
                     
@@ -185,7 +185,7 @@ class Facillimum_Library():
                                     return str.strip(str(a))
                             #a = a.removesuffix(a[a.__len__()-1])
 
-                        elif event.key == pygame.K_BACKSPACE:
+                        elif event.key == pygame.K_BACKSPACE or event.key == pygame.K_DELETE:
                             if not d:
                                 a = a.removesuffix(a[a.__len__()-1])
                             try:

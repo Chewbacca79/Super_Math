@@ -31,9 +31,7 @@ class Coins:
     self.FL.draw_image(self.image, (675, 0))
 
   def reveal_coins(self):
-    if self.move_right == True:
-      self.revealer_rect.x += 75
-      self.move_right = False
+    self.revealer_rect.x += 75
 
   def reset_x(self):
     self.revealer_rect.x = 0
